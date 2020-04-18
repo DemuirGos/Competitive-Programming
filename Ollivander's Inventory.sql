@@ -1,0 +1,1 @@
+select w.id,wp.age,w.coins_needed,w.power from Wands W,Wands_Property WP    where W.code=WP.code and coins_needed in (select min(coins_needed) from wands ww where ww.code=wp.code and wp.is_evil=0 group by ww.power)order by w.power desc,wp.age desc;

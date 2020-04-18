@@ -1,0 +1,1 @@
+select distinct(CITY) from STATION where REGEXP_LIKE(CITY,'^[AOIUE].*');

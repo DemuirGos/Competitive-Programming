@@ -1,0 +1,1 @@
+select distinct(CITY) from STATION where regexp_like(CITY,'^[^AOIUE]|[^aoiue]$') ;

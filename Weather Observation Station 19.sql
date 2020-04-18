@@ -1,0 +1,1 @@
+select round(sqrt(power(max(s.LAT_N)-min(s.LAT_N),2)+power(max(s.LONG_W)-min(s.LONG_W),2)),4) from station s;
