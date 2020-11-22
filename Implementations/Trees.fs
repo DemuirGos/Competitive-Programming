@@ -2,10 +2,13 @@
     type tree<'a> =
         | Empty
         | Leaf of 'a
-        | Node of 'a * tree<'a> list
+        | Node of 'a * (tree<'a> list)
 
-    let concat t r = failwith "not yet made"
-    let filter t pred = failwith "not yet made"
+    let concat t r = 
+        match t with 
+        | Empty -> r
+        | Leaf(v) -> Node(v,[r])
+        | Node(v,children)-> Node(v,r::children)
     let rec length t =
         match t with
         | Empty -> 0
@@ -20,13 +23,15 @@
         seq { 
             match t with
                 | Empty -> ignore t
-                | Leaf(v) -> yield v
+                | Leaf(v) -> yield t
                 | Node(v,children) -> 
-                    yield v
+                    yield t
                     for n in children do yield! flatten n 
             }
+    let filter t pred =
+        t |> flatten |> Seq.filter pred
     let fold t pred = 
-        t |> flatten |> Seq.map (fun n -> match n with Leaf(v) | Node(v,_) -> v) |> Seq.fold pred
+        t |> flatten |> Seq.map (fun n -> match n with Leaf(v) | Node(v,_) -> v | Empty -> ignore n) |> Seq.fold pred
     let rec traverse t func = 
         match t with 
         | Leaf(v) -> 
@@ -63,11 +68,8 @@
     let rec find t p = 
         t |> flatten |> Seq.find p
     let contains t n = 
-        match (find t n) with
-        | None -> false
-        | _ -> true
+        t |> flatten |> Seq.contains n
     let remove t pred = failwith "not yet made"
-    let zip l r = failwith "not yet made"
     let rec iter t func = 
         match t with
         | Node(value,children) -> 
