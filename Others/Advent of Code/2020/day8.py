@@ -620,22 +620,26 @@ def tryFix(codes,ptr):
     completed=False
     if codes[ptr][0] == "jmp":
         codes[ptr][0]="nop"
-        completed = process(codes,0,0,[])
+        completed = process(codes,0,0,[],False)
         codes[ptr][0]="jmp"
     elif codes[ptr][0] == "nop":
         codes[ptr][0]="jmp"
-        completed = process(codes,0,0,[])
+        completed = process(codes,0,0,[],False)
         codes[ptr][0]="nop"
     if not completed :
         tryFix(codes,ptr+1)
-def process (codes,ptr,acc,ran):
+def process (codes,ptr,acc,ran,isPart1):
     if ptr == len(codes):
-        print(acc)
+        if not isPart1:
+            print('part2:',acc)
         return True
     elif ptr in ran:
+        if isPart1:
+            print('part1:',acc)
         return False
     else:
         ran.append(ptr)
         acc,ptr = op[codes[ptr][0]](acc,ptr,codes[ptr][1])
-        return process(codes,ptr,acc,ran)
+        return process(codes,ptr,acc,ran,isPart1)
+process(inlist,0,0,[],True)
 tryFix(inlist,0)
