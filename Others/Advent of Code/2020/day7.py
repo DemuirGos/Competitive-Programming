@@ -624,5 +624,5 @@ def bagCanHold (k) :
             continue
         size+=int(bagTuple[0]) + int(bagTuple[0])*bagCanHold(bagTuple[1])
     return size
-t=bagCanHold("shiny gold")   
-print(t)
+part1=len([b for b in m if canHoldGold(b,"shiny gold")])
+part2=bagCanHold("shiny gold")   
