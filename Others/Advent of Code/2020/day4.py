@@ -1139,4 +1139,3 @@ def check (passport,isPart1) :
     return valid
 part1=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if check(p,True)])
 part2=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if check(p,False)])
-print(part1,part2)
