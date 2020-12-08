@@ -330,5 +330,5 @@ def move(it,stps,carte,c):
     elif carte[y][x]=='#':
         c+=1
     return move(it+1,stps,carte,c)
-r=reduce(mul,[move(0,i,strin.split('\n'),0)for i in [(1,1),(3,1),(5,1),(7,1),(1,2)]])
-print(r)
+part1=reduce(mul,[move(0,i,strin.split('\n'),0)for i in [(3,1)]])
+part2=reduce(mul,[move(0,i,strin.split('\n'),0)for i in [(1,1),(3,1),(5,1),(7,1),(1,2)]])
