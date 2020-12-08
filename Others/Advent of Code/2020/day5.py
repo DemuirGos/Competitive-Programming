@@ -784,4 +784,3 @@ def main(d,code):
 part0=[main([(0,127),(0,7)],i)[0] for i in strin.split('\n')]
 part1=max(part0)
 part2=[i for i in range(min(part0),max(part0)) if i not in part0]
-print(part2)
