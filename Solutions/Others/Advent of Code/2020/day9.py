@@ -10,4 +10,4 @@ def fracture(v,l,r,n):
             fracture(v,l+1,r,n)
         elif sum(v[l:r])==n:
             print('part2:',sum([min(v[l:r]),max(v[l:r])])) 
-fracture(strin,0,r[0][0]-1,r[0][1])
+fracture(strin,0,part1[0][0]-1,part1[0][1])
