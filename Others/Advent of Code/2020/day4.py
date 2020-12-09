@@ -1129,13 +1129,5 @@ checks = {
             'ecl':(lambda s:s in "amb blu brn gry grn hzl oth".split()),
             'pid':(lambda s:True if re.match("[0-9]{9}",s) else False)
          }
-def check (passport,isPart1) :
-    valid=True
-    for c in checks :
-        if c not in passport :
-            return False
-        else:
-            valid &= checks[c](passport[c]) | isPart1
-    return valid
-part1=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if check(p,True)])
-part2=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if check(p,False)])
+part1=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if all(c in p for c in checks)])
+part2=len([p for p in [dict(re.findall("(\w+):([#a-z0-9A-Z]+)",p)) for p in strin] if all(c in p and checks[c](p[c]) for c in checks)])
