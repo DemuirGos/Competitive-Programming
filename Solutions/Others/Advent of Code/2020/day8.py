@@ -1,34 +1,19 @@
 import sys
 strin=open("InputData\day8.txt", "r").read()
-op={"nop":(lambda x,y,v: (x , y + 1)),
-    "acc":(lambda x,y,v: (x + v , y + 1)),
-    "jmp":(lambda x,y,v: (x , y + v))
+op={"nop":(lambda x,y,v: (y + 1,x)),
+    "acc":(lambda x,y,v: (y + 1,x + v)),
+    "jmp":(lambda x,y,v: (y + v,x))
     }
 inlist=[[k[0],int(k[1])] for k in [i.split() for i in strin.split("\n")]]
-def tryFix(codes,ptr):
-    completed=False
-    if codes[ptr][0] == "jmp":
-        codes[ptr][0]="nop"
-        completed = process(codes,0,0,[],False)
-        codes[ptr][0]="jmp"
-    elif codes[ptr][0] == "nop":
-        codes[ptr][0]="jmp"
-        completed = process(codes,0,0,[],False)
-        codes[ptr][0]="nop"
-    if not completed :
-        tryFix(codes,ptr+1)
-def process (codes,ptr,acc,ran,isPart1):
-    if ptr == len(codes):
-        if not isPart1:
-            print('part2:',acc)
-        return True
-    elif ptr in ran:
-        if isPart1:
-            print('part1:',acc)
-        return False
+def tryFix2(codes,ptr,isCompleted):
+    if isCompleted[0] == True:
+        return isCompleted[1]
     else:
-        ran.append(ptr)
-        acc,ptr = op[codes[ptr][0]](acc,ptr,codes[ptr][1])
-        return process(codes,ptr,acc,ran,isPart1)
-process(inlist,0,0,[],True)
-tryFix(inlist,0)
+        return tryFix2(inlist.copy(),ptr+1,isCompleted if codes[ptr][0]=="acc" else process(codes[:ptr] + [["nop" if codes[ptr][0]=="jmp" else "jmp" if codes[ptr][0]=="nop" else codes[ptr][0],codes[ptr][1]]] + codes[ptr+1:],(0,0),[]))
+def process (codes,pcc,ran):
+    if pcc[0] == len(codes):
+        return (True,pcc[1])
+    else:
+        return (False,pcc[1]) if pcc[0] in ran else process(codes,op[codes[pcc[0]][0]](pcc[1],pcc[0],codes[pcc[0]][1]),ran+[pcc[0]])
+part1=process(inlist,(0,0),[])[1]
+part2=tryFix2(inlist.copy(),0,(False,0))
