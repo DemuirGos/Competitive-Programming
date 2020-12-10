@@ -1,7 +1,6 @@
 import sys
 import re
-strin = open("InputData\day7.txt", "r").read()
-m=dict((w[0][1],dict([i[::-1] for i in w[1:]])) for w in [re.findall("(\d+)? ?(\w+ \w+) bag",s) for s in strin.split('\n')])
+m=dict((w[0][1],dict([i[::-1] for i in w[1:]])) for w in [re.findall("(\d+)? ?(\w+ \w+) bag",s) for s in open("InputData\day7.txt", "r").read().split('\n')])
 def canHoldGold (s,k) :
     if k in s:
         return True
