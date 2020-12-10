@@ -10,7 +10,6 @@ def part1diff(s,v,l,stp,m,r,fun):
             return part1diff(s+i,v,l,stp,m,r,fun)
     return fun(s,v,l,stp,m,r)
 def part2path(v,d,stp,fun):
-    print(d)
     for adapter in d :
         for step in stp:
             if adapter + step in d:
