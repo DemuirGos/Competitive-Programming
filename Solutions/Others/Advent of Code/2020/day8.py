@@ -1,10 +1,9 @@
 import sys
-strin=open("InputData\day8.txt", "r").read()
 op={"nop":(lambda x,y,v: (y + 1,x)),
     "acc":(lambda x,y,v: (y + 1,x + v)),
     "jmp":(lambda x,y,v: (y + v,x))
     }
-inlist=[[k[0],int(k[1])] for k in [i.split() for i in strin.split("\n")]]
+inlist=[[k[0],int(k[1])] for k in [i.split() for i in open("InputData\day8.txt", "r").read().split("\n")]]
 def tryFix2(codes,ptr,isCompleted):
     if isCompleted[0] == True:
         return isCompleted[1]
