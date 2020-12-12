@@ -23,12 +23,11 @@ def countadj(state,i,j,offs,r):
     else:
         return r
 def NextState(old,state,isPart1):
-    sideEffect = (lambda s,r:1 if s[r[0][0]][r[0][1]] == -1 and r[1]>=5 else -1 if s[r[0][0]][r[0][1]] == 1 and r[1]==0 else s[r[0][0]][r[0][1]])
-    return [state.copy(),[[sideEffect(state,countadj(old,s,l,offsets(state,(s,l),isPart1),((l,s),0)))  for s in range(len(state[0]))] for l in range(len(state))]]
+    return [state.copy(),[[(lambda s,r:1 if s[r[0][0]][r[0][1]] == -1 and r[1]>= (4 if isPart1 else 5) else -1 if s[r[0][0]][r[0][1]] == 1 and r[1]==0 else s[r[0][0]][r[0][1]])(state,countadj(old,s,l,offsets(state,(s,l),isPart1),((l,s),0)))  for s in range(len(state[0]))] for l in range(len(state))]]
 def engine(states,isPart1):
     if states[0]!=states[1]:
         return engine(NextState(states[1].copy(),states[1],isPart1),isPart1)
     else:
         return states[0]
-part1 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,True),True)])
-part2 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,False),False)])
+part1 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,isPart1=True),isPart1=True)])
+part2 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,isPart1=False),isPart1=False)])
