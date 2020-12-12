@@ -30,4 +30,5 @@ def engine(states,isPart1):
         return engine(NextState(states[1].copy(),states[1],isPart1),isPart1)
     else:
         return states[0]
-print(sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,False),False)]))
+part1 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,True),True)])
+part2 = sum([sum([1 for s in l if s==-1]) for l in engine(NextState(state0.copy(),state0,False),False)])
