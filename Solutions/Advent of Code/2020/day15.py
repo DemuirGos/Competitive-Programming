@@ -1,6 +1,6 @@
-strin=list(enumerate(map(int,open("InputData\day1.txt", "r").split(','))))
+strin=list(enumerate(map(int,open("InputData\day15.txt", "r").read().split(','))))
 def process(l,starters):
-    r,dictionary=strin[len(strin)-1][1],{n:(i) for i,n in strin}
+    r,dictionary=starters[len(starters)-1][1],{n:(i) for i,n in starters}
     for i in range(len(starters)-1,l-1):
         dictionary[r],r =i, i - dictionary.get(r,i)
     return r
