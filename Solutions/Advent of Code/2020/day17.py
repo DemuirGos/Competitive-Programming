@@ -6,7 +6,6 @@ def proc(strin,dim):
     offsets = [i for i in list(itertools.product([-1,0,1],repeat=dim)) if i!=tuple([0]*dim)]
     inpt = [(i,j,0,0) for j in range(len(strin)) for i in range(len(strin[0])) if strin[j][i]=="#"]
     def engine(old,cycle,lim,dim):
-        print(cycle)
         if cycle==lim:
             return old
         else:
