@@ -1,6 +1,6 @@
 import re
 import operator as OP
-generalRules = {"*":(2,OP.mul),"/":(2,OP.add),"+":(1,OP.add),"-":(1,OP.add)}
+generalRules = {"*":(2,OP.mul),"/":(2,OP.truediv),"+":(1,OP.add),"-":(1,OP.sub)}
 expr = lambda s : list(map(lambda x : int(x) if re.match("\d+", x) else x, re.sub('\(',' ( ', re.sub('\)',' ) ',s)).split()))
 strin = list(map(expr,open("InputData\day18.txt", "r").read().split('\n')))
 def process(ixpr,op):
