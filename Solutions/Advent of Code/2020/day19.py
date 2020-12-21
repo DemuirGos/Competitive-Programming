@@ -13,8 +13,8 @@ def check(rule,word,part):
     if rule== [] or word=='':
         return rule== [] and word==''
     if isinstance(rules[rule[0]],list):
-        return any(check(r + rule[1:],word) for r in rules[rule[0]])        
+        return any(check(r + rule[1:],word,part) for r in rules[rule[0]])        
     elif isinstance(rules[rule[0]],str):
-        return check(rule[1:],word[1:]) if word[0] == rules[rule[0]] else False
+        return check(rule[1:],word[1:],part) if word[0] == rules[rule[0]] else False
 part1 = sum([check([0],m,part=1) for m in messages])
 part2 = sum([check([0],m,part=2) for m in messages])
