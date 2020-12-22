@@ -22,13 +22,8 @@ def filterFood(f,a):
 def DeepMap(allergens):
     if any([len(c)!=1 for c in allergens.values()]):
         heads = [list(i)[0] for i in allergens.values() if len(i)==1]
-        for head in heads:
-            for allergen in allergens:
-                if len(allergens[allergen])!=1 and head in allergens[allergen]:
-                    allergens[allergen].remove(head)
-        return DeepMap(allergens)
+        return DeepMap({allergen:(allergens[allergen] if len(allergens[allergen])==1 else [element for element in allergens[allergen] if element not in heads]) for allergen in allergens})
     else:
-        return allergenMap
-allergenMap = transformer({},dic)
-part1 = len(filterFood(food,list(reduce(lambda x,y:x.union(y),[i for i in allergenMap.values()]))))
-part2 = ",".join([list(i[1])[0] for i in sorted(DeepMap(allergenMap).items(),key=lambda x:x[0])])
+        return allergens
+part1 = len(filterFood(food,list(reduce(lambda x,y:x.union(y),[i for i in transformer({},dic).values()]))))
+part2 = ",".join([list(i[1])[0] for i in sorted(DeepMap(transformer({},dic)).items(),key=lambda x:x[0])])
