@@ -1,8 +1,8 @@
 ﻿module Tree
-    type tree<'a> =
+    type Tree<'a> =
         | Empty
         | Leaf of 'a
-        | Node of 'a * (tree<'a> list)
+        | Node of 'a * (Tree<'a> list)
 
     let concat t r = 
         match t with 
@@ -13,7 +13,7 @@
         match t with
         | Empty -> 0
         | Leaf(_) -> 1
-        | Node(v,children) -> 1 + (children |> List.map (fun n -> length n) |> List.max)
+        | Node(v,children) -> 1 + (children |> List.map (length) |> List.max)
     let rec map t trans = 
         match t with
         | Empty -> Empty
