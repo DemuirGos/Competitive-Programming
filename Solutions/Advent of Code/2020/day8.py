@@ -1,5 +1,5 @@
 import sys
-op={"nop":(lambda x,y,v: (y + 1,x)),
+op={"nop":(lambda x,y,_: (y + 1,x)),
     "acc":(lambda x,y,v: (y + 1,x + v)),
     "jmp":(lambda x,y,v: (y + v,x))}
 inlist=[[k[0],int(k[1])] for k in [i.split() for i in open("InputData\day8.txt", "r").read().split("\n")]]
