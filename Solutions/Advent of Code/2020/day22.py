@@ -23,6 +23,8 @@ def playGame2(deck1,deck2,memo=[[]]*2):
 part1 = sum([v*(i+1) for i,v in enumerate(reversed(LkbirYghlb(*strin)))])
 part2 = sum([v*(i+1) for i,v in enumerate(reversed(playGame2(*strin,[[]]*2)[1]))])
 
+#the stackoverflow loving first implimentation :
+
 #def playGame(deck1,deck2,memo):
 #    if any([len(i) == 0 for i in [deck1,deck2]]):
 #        return (0,deck1) if len(deck1)!= 0 else (1,deck2)

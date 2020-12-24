@@ -8,4 +8,4 @@ BlackWhite = (lambda r :{i:r.count(i)%2 for i in list(dict.fromkeys(r))})([proce
 Neighbors = lambda o,p,g :(lambda r:[point for point in r if point not in g] + [p])([tuple(c + o for c, o in zip(p, offset)) for offset in o ])
 process = lambda grid,offsets,cycle : list(grid.values()).count(1) if cycle == 0 else process({i:(0 if (grid.get(i,0) == 1 and not(0 < count(offsets,grid,i) <= 2)) else 1 if (grid.get(i,0) == 0 and count(offsets,grid,i) == 2) else grid.get(i,0)) for j in grid for i in Neighbors(offsets,j,grid)},offsets,cycle-1)
 part1 = [BlackWhite[i] for i in BlackWhite].count(1)
-part2 = process(BlackWhite,directions.values(),100)
+part2 = process(BlackWhite,directions.values(), 100)
