@@ -1,4 +1,3 @@
-from pprint import pprint
 import numpy
 from itertools import product
 from functools import reduce
