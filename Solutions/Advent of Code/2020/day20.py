@@ -44,7 +44,3 @@ def search(grid,pieces):
     return HideSeek(construct(grid),[list(i) for i in ["                  # ","#    ##    ##    ###"," #  #  #  #  #  #   "]])
 part1 = (lambda r: reduce(lambda x,y:x*y,[int(r[i][1][0]) for i in product([0,int(sqrt(len(strin)))-1], repeat=2)]))(solve([(id,[''.join(l) for l in Edges(p)]) for id,p in strin],int(sqrt(len(strin))))[1])
 part2 = (lambda c,t:t - c) (*search(solve([(id,[''.join(l) for l in Edges(p)]) for id,p in strin],int(sqrt(len(strin))))[1],dict(strin)))
-<<<<<<< Updated upstream
-=======
-print(part1,part2)
->>>>>>> Stashed changes
