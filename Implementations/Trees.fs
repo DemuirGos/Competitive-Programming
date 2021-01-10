@@ -69,7 +69,6 @@
         t |> flatten |> Seq.find p
     let contains t n = 
         t |> flatten |> Seq.contains n
-    let remove t pred = failwith "not yet made"
     let rec iter t func = 
         match t with
         | Node(value,children) -> 
