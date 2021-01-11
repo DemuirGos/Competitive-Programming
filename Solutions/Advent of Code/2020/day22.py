@@ -1,4 +1,3 @@
-import pprint
 strin=[[int(j) for j in i.split('\n')[1:]] for i in open("InputData/day22.txt",'r').read().split('\n\n')]
 def LkbirYghlb(deck1,deck2):
     if any([len(i) == 0 for i in [deck1,deck2]]):
