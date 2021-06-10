@@ -7,6 +7,19 @@ open FSharp.Core
             opt1 
         else opt2
 
+    let toHex bytes = 
+        bytes 
+        |> Array.map (fun (x : byte) -> System.String.Format("{0:X2}", x))
+        |> String.concat System.String.Empty
+
+    let fromHex (s:string) = 
+        s
+        |> Seq.windowed 2
+        |> Seq.mapi (fun i j -> (i,j))
+        |> Seq.filter (fun (i,j) -> i % 2=0)
+        |> Seq.map (fun (_,j) -> Byte.Parse(new System.String(j),System.Globalization.NumberStyles.AllowHexSpecifier))
+        |> Array.ofSeq
+
     let shift r (byteArr:uint16 array) =
         let bytesList = byteArr |> Array.toList
         let bytes, bits, size =  r / 16, r % 16, List.length bytesList
@@ -25,12 +38,12 @@ open FSharp.Core
         |> List.toArray
     let (<<<=) a b = shift b a 
 
-    let ByteToUint16 arr = arr |> Array.chunkBySize 2 
+    let toUint16 arr = arr |> Array.chunkBySize 2 
                                |> Array.map (fun [|l; r|] -> 
                                     let l', r' = uint16 l, uint16 r
                                     (l' <<< 8) ||| r' )
 
-    let Uint16ToByte arr = arr |> Array.map (fun i -> 
+    let toByte arr = arr |> Array.map (fun i -> 
                                     [|i >>> 8; i|])
                                |> Array.concat
                                |> Array.map byte
@@ -81,7 +94,6 @@ open FSharp.Core
  
 module IDEA =
     let rounds = 8
-    
     type IDEA = {
         keys : (uint16[]) *  (uint16[])
     }
@@ -90,36 +102,34 @@ module IDEA =
     let invert (key:uint16 [][]) = 
         let keys =  key 
                     |> Array.concat
-        let generate round =
-            let beggining = (round = 8 ) ? (4, 4 + (round - 1) * 6)
-            let gen =   if round = rounds then
-                            [|
-                                !* keys.[0]
-                                !+ keys.[1]
-                                !+ keys.[2]
-                                !* keys.[3]
-                            |]
-                        else
-                            let j, k = (round > 0) ? ((3, 4),(4, 3))
-                            [|
-                                !* keys.[beggining + 2]
-                                !+ keys.[beggining + j]
-                                !+ keys.[beggining + k]
-                                !* keys.[beggining + 5]
-                                keys.[beggining + 0]
-                                keys.[beggining + 1]
-                            |]
-            gen
-        [|
-            for i in 7..0 do 
-                yield generate i
-        |]
+        let rec generate round acc =
+            let beggining = (round = 8 ) ? (0, 4 + (8 - round - 1) * 6)
+            if round = rounds then
+                ([|
+                    !* keys.[beggining + 0]
+                    !+ keys.[beggining + 1]
+                    !+ keys.[beggining + 2]
+                    !* keys.[beggining + 3]
+                |]::acc)
+                |> List.toArray
+                |> Array.rev
+            else
+                let j, k = (round > 0) ? ((4, 3),(3, 4))
+                generate (round + 1) ([|
+                    !* keys.[beggining + 2]
+                    !+ keys.[beggining + j]
+                    !+ keys.[beggining + k]
+                    !* keys.[beggining + 5]
+                    keys.[beggining + 0]
+                    keys.[beggining + 1]
+                |]::acc)
+        generate 0 []
 
     let extract (key:byte[]) = 
         let size = Array.length key
         if size = 16 then 
             let subkeys = 
-                key |> ByteToUint16
+                key |> toUint16
             let enkeys = 
                 [|
                     for i in 0..6 do
@@ -127,10 +137,10 @@ module IDEA =
                 |]  |> Array.mapi (fun i arr -> 
                         if i <> 6 then arr else arr.[1..4])
                     |> Array.concat 
+                    |> Array.skip 8
                     |> Array.chunkBySize 6
             let dekeys = 
                 invert enkeys
-            
             Ok ([enkeys; dekeys] |> List.map (Array.concat))
         else 
             Error "Failed : key size must be 128bit | 16byte"
@@ -143,36 +153,36 @@ module IDEA =
         | _ -> None
 
     let digest data (keys:uint16 []) =
-        let data' = data |> ByteToUint16
         let rec loop round (keys':uint16[]) (data:uint16[]) = 
             let idx = round * 6 
+            let func = [Mul; Add; Add; Mul]
             match round with 
             | 8 -> 
                 [|
-                    data.[0] *. keys.[idx + 1]
-                    data.[2] *. keys.[idx + 2]
-                    data.[1] *. keys.[idx + 3]
-                    data.[3] *. keys.[idx + 4]
-                |] |> Uint16ToByte
+                    data.[0] *. keys.[idx + 0]
+                    data.[2] +. keys.[idx + 1]
+                    data.[1] +. keys.[idx + 2]
+                    data.[3] *. keys.[idx + 3]
+                |] |> toByte
             | _ -> 
-                let part1 = [Mul; Add; Add; Mul]
                 let ys = [
-                    for i in idx..(idx+3)
-                        -> (part1.[i - idx] data'.[i - idx] keys'.[i])
+                    for i in 0..3
+                        -> func.[i] data.[i] keys'.[i + idx]
                 ]
                 let ts  = 
-                    let t1 = (ys.[0] ^^^ ys.[2]) *. keys'.[idx + 4]
-                    let t2 = (ys.[1] ^^^ ys.[3]) +. t1
-                    let t3 = (t2 *. keys'.[idx + 5])
-                    let t4 = (t1 +. keys'.[idx + 4])
-                    [t1; t2; t3; t4]
+                    let t0 = (ys.[0] ^^^ ys.[2]) *. keys'.[idx + 4]
+                    let t1 = (ys.[1] ^^^ ys.[3]) +. t0
+                    let t2 = (t1 *. keys'.[idx + 5])
+                    let t3 = (t0 +. t2)
+                    [t0; t1; t2; t3]
                 loop (round + 1) keys' [|
                     ys.[0] ^^^ ts.[2]
                     ys.[2] ^^^ ts.[2]
                     ys.[1] ^^^ ts.[3]
                     ys.[3] ^^^ ts.[3]
                 |]
-        loop 0 keys data'
+        loop 0 keys (data |> toUint16)
+
     let crypt data mode algo =
         let crypt' = digest data
         let enkeys, dekeys = algo.keys
@@ -182,19 +192,20 @@ module IDEA =
         | Decryption -> 
             crypt' dekeys
 
-[<EntryPoint>]
-let main args = 
-    let key = 
-        let key' = [|1..16|] |> Array.map byte 
-        Random().NextBytes(key'); key'
-    let data = 
-        let data' = [|1..16|] |> Array.map byte 
-        Random().NextBytes(data'); data'
+let main = 
+    let key = fromHex "006400C8012C019001F4025802BC0320"
+    let data = fromHex "05320A6414C819FA"
+    let expected = "65BE87E7A2538AED"
     let algo = IDEA.create key
-    let r = match algo with 
-            | Some r -> 
-                let enrs = IDEA.crypt data IDEA.Encryption r
-                let ders = IDEA.crypt enrs IDEA.Decryption r
-                Ok (enrs, ders)
-            | None   ->  Error "Hmmm Something went wrong"
-    0
+    match algo with 
+        | Some r -> 
+            let enrs = IDEA.crypt data IDEA.Encryption r
+            let ders = IDEA.crypt enrs IDEA.Decryption r
+            printf "%A" {|
+                            Data           =  data 
+                            Encryption_key =  fst r.keys 
+                            Decryption_key =  snd r.keys  
+                            Encrypted_Data =  enrs    
+                            Decrypted_Data =  ders  
+                        |}
+        | None   ->  printf "Error Algo Mal-defined"
