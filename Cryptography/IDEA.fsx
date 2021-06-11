@@ -1,5 +1,6 @@
 open System
 open FSharp.Core
+open FSharp.Collections
     
 [<AutoOpen>] module Utils = 
     let (?) condition (opt1, opt2) = 
@@ -104,7 +105,7 @@ module IDEA =
                     |> Array.concat
         let rec generate round acc =
             let beggining = (round = 8 ) ? (0, 4 + (8 - round - 1) * 6)
-            if round = rounds then
+            if round = 8 then
                 ([|
                     !* keys.[beggining + 0]
                     !+ keys.[beggining + 1]
@@ -137,7 +138,6 @@ module IDEA =
                 |]  |> Array.mapi (fun i arr -> 
                         if i <> 6 then arr else arr.[1..4])
                     |> Array.concat 
-                    |> Array.skip 8
                     |> Array.chunkBySize 6
             let dekeys = 
                 invert enkeys
@@ -192,20 +192,21 @@ module IDEA =
         | Decryption -> 
             crypt' dekeys
 
-let main = 
+let main =
     let key = fromHex "006400C8012C019001F4025802BC0320"
     let data = fromHex "05320A6414C819FA"
     let expected = "65BE87E7A2538AED"
     let algo = IDEA.create key
     match algo with 
         | Some r -> 
+            let enkey, dekey = r.keys
             let enrs = IDEA.crypt data IDEA.Encryption r
             let ders = IDEA.crypt enrs IDEA.Decryption r
-            printf "%A" {|
-                            Data           =  data 
-                            Encryption_key =  fst r.keys 
-                            Decryption_key =  snd r.keys  
-                            Encrypted_Data =  enrs    
-                            Decrypted_Data =  ders  
-                        |}
-        | None   ->  printf "Error Algo Mal-defined"
+            Ok (Map [
+                "Data"           ,  data |> toHex
+                "Encryption key" ,  enkey |> toByte |> toHex
+                "Decryption key" ,  dekey |> toByte |> toHex
+                "Encrypted Data" ,  enrs |> toHex
+                "Decrypted Data" ,  ders |> toHex
+            ])
+        | None   ->  Error "Error Algo Mal-defined"
