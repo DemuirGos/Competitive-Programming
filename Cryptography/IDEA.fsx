@@ -21,24 +21,6 @@ open FSharp.Collections
         |> Seq.map (fun (_,j) -> Byte.Parse(new System.String(j),System.Globalization.NumberStyles.AllowHexSpecifier))
         |> Array.ofSeq
 
-    let shift r (byteArr:uint16 array) =
-        let bytesList = byteArr |> Array.toList
-        let bytes, bits, size =  r / 16, r % 16, List.length bytesList
-        let rotatedByBlock = 
-            let block = bytesList.[.. bytes - 1]
-            let bytesList' = bytesList.[bytes ..] @ block
-            bytesList'
-        let rotatedByRemBits = 
-            rotatedByBlock
-            |> List.mapi (fun i _ -> 
-                    let left = rotatedByBlock.[i] <<< bits
-                    let right= (16 - bits = 16) ? (0us, rotatedByBlock.[(i + 1) % size] >>> (16-bits))
-                    left ||| right
-                )
-        rotatedByRemBits
-        |> List.toArray
-    let (<<<=) a b = shift b a 
-
     let toUint16 arr = arr |> Array.chunkBySize 2 
                                |> Array.map (fun [|l; r|] -> 
                                     let l', r' = uint16 l, uint16 r
@@ -49,11 +31,10 @@ open FSharp.Collections
                                |> Array.concat
                                |> Array.map byte
 
+[<AutoOpen>] module Arithmetic = 
     let inline modulo b a = (a % b + b) % b
     let inline (%.) a b = modulo b a
 
-[<AutoOpen>] module Arithmetic = 
-       
     let Add (a:uint16) (b:uint16) = (a + b) &&& 0xFFFFus
     let ( +. ) = Add 
     
@@ -93,6 +74,24 @@ open FSharp.Collections
         r |> uint16
     let ( !* ) = MulInv
  
+    let shift r (byteArr:uint16 array) =
+        let bytesList = byteArr |> Array.toList
+        let bytes, bits, size =  r / 16, r % 16, List.length bytesList
+        let rotatedByBlock = 
+            let block = bytesList.[.. bytes - 1]
+            let bytesList' = bytesList.[bytes ..] @ block
+            bytesList'
+        let rotatedByRemBits = 
+            rotatedByBlock
+            |> List.mapi (fun i _ -> 
+                    let left = rotatedByBlock.[i] <<< bits
+                    let right= (16 - bits = 16) ? (0us, rotatedByBlock.[(i + 1) % size] >>> (16-bits))
+                    left ||| right
+                )
+        rotatedByRemBits
+        |> List.toArray
+    let (<<<=) a b = shift b a 
+
 module IDEA =
     let rounds = 8
     type IDEA = {
@@ -195,7 +194,7 @@ module IDEA =
 let main =
     let key = fromHex "006400C8012C019001F4025802BC0320"
     let data = fromHex "05320A6414C819FA"
-    let expected = "65BE87E7A2538AED"
+    let expected = "65BE87E7A2538AED", "05320A6414C819FA"
     let algo = IDEA.create key
     match algo with 
         | Some r -> 
@@ -203,10 +202,14 @@ let main =
             let enrs = IDEA.crypt data IDEA.Encryption r
             let ders = IDEA.crypt enrs IDEA.Decryption r
             Ok (Map [
-                "Data"           ,  data |> toHex
-                "Encryption key" ,  enkey |> toByte |> toHex
-                "Decryption key" ,  dekey |> toByte |> toHex
-                "Encrypted Data" ,  enrs |> toHex
-                "Decrypted Data" ,  ders |> toHex
+                "0 - Data"           ,  [|data|] |> Array.map toHex
+                "1 - Encryption key" ,  enkey
+                                      |> Array.chunkBySize 6 
+                                      |> Array.map (toByte >> toHex)
+                "2 - Decryption key" ,  dekey
+                                      |> Array.chunkBySize 6 
+                                      |> Array.map (toByte >> toHex)
+                "1 - Encrypted Data" ,  [|enrs|] |> Array.map toHex
+                "2 - Decrypted Data" ,  [|ders|] |> Array.map toHex
             ])
         | None   ->  Error "Error Algo Mal-defined"
